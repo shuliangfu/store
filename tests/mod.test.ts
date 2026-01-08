@@ -2,7 +2,7 @@
  * @fileoverview Store 测试
  */
 
-import { describe, expect, it } from "jsr:@dreamer/test@^1.0.0-alpha.1";
+import { describe, expect, it } from "@dreamer/test";
 import { defineStore } from "../src/mod.ts";
 
 // 定义 Store 类型接口
