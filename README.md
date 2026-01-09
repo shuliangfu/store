@@ -1,8 +1,13 @@
 # @dreamer/store
 
-一个用于 Deno 的客户端状态管理库，专为 Preact 和 React 设计，提供响应式状态管理功能。
+> 一个兼容 Deno 和 Bun 的客户端状态管理库，专为 Preact 和 React 设计，提供响应式状态管理功能
 
-## 功能
+[![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## 🎯 功能
 
 客户端状态管理库，用于管理客户端应用的状态，支持 Preact 和 React。
 
@@ -48,10 +53,6 @@
 - 表单状态管理
 - UI 状态管理（主题、侧边栏等）
 
-## 优先级
-
-⭐⭐⭐⭐
-
 ## 安装
 
 ```bash
@@ -60,12 +61,14 @@ deno add jsr:@dreamer/store
 
 ## 环境兼容性
 
-- **Deno 版本**：要求 Deno 2.5 或更高版本
+- **运行时要求**：Deno 2.5+ 或 Bun 1.0+
 - **服务端**：❌ 不支持（纯客户端状态管理库，持久化使用 localStorage/sessionStorage，不需要服务端支持）
 - **客户端**：✅ 支持（浏览器环境，完整的客户端状态管理功能）
 - **依赖**：无外部依赖（纯 TypeScript 实现，兼容 Preact 和 React）
 
-## 示例用法
+---
+
+## 🚀 快速开始
 
 ### Store 方式（推荐）
 
@@ -298,87 +301,9 @@ function UserInfo() {
 }
 ```
 
-### 完整示例
+---
 
-```typescript
-import { createStore, persist } from "jsr:@dreamer/store";
-
-// 定义 Store
-interface AppStore {
-  // 状态
-  count: number;
-  todos: Array<{ id: number; text: string; completed: boolean }>;
-  filter: "all" | "active" | "completed";
-
-  // Actions
-  increment: () => void;
-  decrement: () => void;
-  addTodo: (text: string) => void;
-  toggleTodo: (id: number) => void;
-  setFilter: (filter: "all" | "active" | "completed") => void;
-
-  // Selectors（计算属性）
-  filteredTodos: () => Array<{ id: number; text: string; completed: boolean }>;
-}
-
-// 创建 Store
-const useAppStore = defineStore<AppStore>((set, get) => ({
-  count: 0,
-  todos: [],
-  filter: "all",
-
-  increment: () => set((state) => ({ count: state.count + 1 })),
-  decrement: () => set((state) => ({ count: state.count - 1 })),
-
-  addTodo: (text: string) => set((state) => ({
-    todos: [...state.todos, { id: Date.now(), text, completed: false }],
-  })),
-
-  toggleTodo: (id: number) => set((state) => ({
-    todos: state.todos.map((todo) =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ),
-  })),
-
-  setFilter: (filter) => set({ filter }),
-
-  filteredTodos: () => {
-    const { todos, filter } = get();
-    if (filter === "active") return todos.filter((t) => !t.completed);
-    if (filter === "completed") return todos.filter((t) => t.completed);
-    return todos;
-  },
-}));
-
-// 在组件中使用
-function TodoApp() {
-  const count = useAppStore((state) => state.count);
-  const todos = useAppStore((state) => state.filteredTodos());
-  const filter = useAppStore((state) => state.filter);
-  const increment = useAppStore((state) => state.increment);
-  const addTodo = useAppStore((state) => state.addTodo);
-  const setFilter = useAppStore((state) => state.setFilter);
-
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={increment}>+</button>
-
-      <div>
-        <button onClick={() => setFilter("all")}>All</button>
-        <button onClick={() => setFilter("active")}>Active</button>
-        <button onClick={() => setFilter("completed")}>Completed</button>
-      </div>
-
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.text}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-```
+## 📚 API 文档
 
 ## 与 Preact Signals 的关系
 
@@ -388,9 +313,29 @@ function TodoApp() {
   - **简单状态**：使用 Signals 方式（轻量级、高性能）
   - **复杂状态**：使用 Store 方式（集中管理、更好的组织）
 
-## 备注
+## 📝 备注
 
 - 专为客户端状态管理设计，纯客户端库
 - 支持 Preact 和 React，API 保持一致
 - 推荐在 `_app.tsx` 中初始化全局 Store
 - 状态持久化使用 localStorage/sessionStorage，适合客户端场景
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+---
+
+## 📄 许可证
+
+MIT License - 详见 [LICENSE.md](./LICENSE.md)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by Dreamer Team**
+
+</div>
