@@ -1,131 +1,80 @@
 /**
- * 示例：使用 set、get、api 方式创建 Store
+ * 示例：使用 defineStore(key, config) 方式创建 Store
  *
- * 这个示例展示了如何使用传统的 set、get 和 api 参数来创建和管理状态
+ * 与 view store 相同的调用方式：state / getters / actions / persist
  */
 
 import { defineStore } from "../src/mod.ts";
 
-// 定义 Store 类型
-interface UserStore {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    lastLogin?: Date;
-  } | null;
+type UserState = {
+  user: { id: string; name: string; email: string; lastLogin?: Date } | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-
-  // Actions
+};
+type UserActions = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  updateUser: (updates: Partial<NonNullable<UserStore["user"]>>) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-}
+  updateUser: (
+    updates: Partial<{ id: string; name: string; email: string }>,
+  ) => void;
+};
 
-// 使用 set、get、api 方式创建 Store
-const useUserStore = defineStore<UserStore>((set, get, api) => ({
-  // 初始状态
-  user: null,
-  isAuthenticated: false,
-  loading: false,
-  error: null,
-
-  // 异步 Action - 使用 set 更新状态
-  login: async function (email: string, password: string) {
-    // 使用 set 更新 loading 状态
-    set({ loading: true, error: null });
-
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error("登录失败");
+// 使用 defineStore(key, config)，asObject: false 得到 [get, set, actions]
+const result = defineStore("user-store-example", {
+  state: {
+    user: null as UserState["user"],
+    isAuthenticated: false as boolean,
+    loading: false as boolean,
+    error: null as string | null,
+  },
+  actions: {
+    async login(email: string, password: string) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (!response.ok) throw new Error("登录失败");
+        const user = await response.json();
+        this.user = user;
+        this.isAuthenticated = true;
+        this.loading = false;
+      } catch (e) {
+        this.loading = false;
+        this.error = e instanceof Error ? e.message : "未知错误";
       }
-
-      const user = await response.json();
-
-      // 使用 set 更新状态
-      set({
-        user,
-        isAuthenticated: true,
-        loading: false,
-      });
-
-      // 使用 api 调用其他方法
-      api?.updateUser({ lastLogin: new Date() });
-    } catch (error) {
-      // 使用 set 更新错误状态
-      set({
-        loading: false,
-        error: error instanceof Error ? error.message : "未知错误",
-      });
-    }
+    },
+    logout() {
+      this.user = null;
+      this.isAuthenticated = false;
+      this.error = null;
+    },
+    updateUser(updates: Partial<{ id: string; name: string; email: string }>) {
+      const current = this.user;
+      if (current) {
+        this.user = { ...current, ...updates };
+      }
+    },
   },
-
-  // 同步 Action - 使用 set 更新状态
-  logout: function () {
-    set({
-      user: null,
-      isAuthenticated: false,
-      error: null,
-    });
-  },
-
-  // 更新部分状态 - 使用 get 获取当前状态，set 更新状态
-  updateUser: function (updates) {
-    // 使用 get 获取当前状态
-    const currentUser = get().user;
-    if (currentUser) {
-      // 使用 set 更新状态
-      set({
-        user: { ...currentUser, ...updates },
-      });
-    }
-  },
-
-  // 设置 loading 状态
-  setLoading: function (loading: boolean) {
-    set({ loading });
-  },
-
-  // 设置错误状态
-  setError: function (error: string | null) {
-    set({ error });
-  },
-}));
+  asObject: false,
+}) as [
+  () => UserState,
+  (v: UserState | ((p: UserState) => UserState)) => void,
+  UserActions,
+];
+const [get, set, actions] = result;
 
 // 使用示例
 async function example() {
-  // 获取状态
-  const state = useUserStore.getState();
-  console.log("当前状态:", state);
-
-  // 订阅状态变化
-  const unsubscribe = useUserStore.subscribe((state: UserStore) => {
-    console.log("状态已更新:", state);
-  });
-
-  // 调用方法
-  const storeState = useUserStore.getState();
-  await storeState.login("user@example.com", "password123");
-
-  // 更新用户信息
-  storeState.updateUser({ name: "新用户名" });
-
-  // 登出
-  storeState.logout();
-
-  // 取消订阅
-  unsubscribe();
+  console.log("当前状态:", get());
+  await actions.login("user@example.com", "password123");
+  console.log("登录后:", get().user);
+  actions.updateUser({ name: "新用户名" });
+  actions.logout();
 }
 
-// 导出供测试使用
-export { example, useUserStore };
+export { actions, example, get, set };

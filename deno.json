@@ -1,14 +1,15 @@
 {
   "name": "@dreamer/store",
-  "version": "1.0.0-beta.3",
-  "license": "MIT",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
   "exports": {
     ".": "./src/mod.ts"
   },
   "publish": {
     "include": [
       "src/mod.ts",
-      "LICENSE.md",
+      "LICENSE",
+      "NOTICE",
       "README.md"
     ],
     "exclude": [
@@ -32,6 +33,6 @@
     }
   },
   "imports": {
-    "@dreamer/test": "jsr:@dreamer/test@^1.0.0-beta.6"
+    "@dreamer/test": "jsr:@dreamer/test@^1.0.10"
   }
 }

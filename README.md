@@ -1,341 +1,265 @@
 # @dreamer/store
 
-> 一个兼容 Deno 和 Bun 的客户端状态管理库，专为 Preact 和 React 设计，提供响应式状态管理功能
+> A client-side state management library with the same API style as
+> @dreamer/view store: global keyed stores, getters, actions, and optional
+> persist.
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
+[![Tests](https://img.shields.io/badge/tests-18%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
+
+📖 **Docs**: English | [中文 (Chinese)](./docs/zh-CN/README.md)
 
 ---
 
-## 🎯 功能
+## 🎯 Features
 
-客户端状态管理库，用于管理客户端应用的状态，支持 Preact 和 React。
+- **defineStore(key, config)** — Create a store by key; same key returns the
+  same instance (global singleton).
+- **state / getters / actions** — `config.state` (required), optional `getters`
+  (derived via `this`), optional `actions` (direct `this.xxx = value` or
+  `this.setState`, and `this.otherAction()`).
+- **persist** — Optional restore from storage on init and save on update;
+  default key is the store key; default storage is `localStorage` when
+  available.
+- **Return shape** — `asObject: true` (default): single object (e.g.
+  `store.count`, `store.increment()`). `asObject: false`: tuple
+  `[get, set, getters?, actions?]`.
+- **Auto-cleanup** — When the runtime supports WeakRef/FinalizationRegistry and
+  no references to the store remain, the key is removed from the global
+  registry; only the in-memory registry is cleared, **persist** storage is not
+  affected.
 
-## 特性
+---
 
-- **响应式状态**：
-  - 基于 Signals 的响应式状态管理
-  - 自动依赖追踪
-  - 细粒度更新（只更新依赖的组件）
-  - 高性能（避免不必要的重渲染）
-- **状态管理方式**：
-  - **Store（推荐）**：类似 Redux/Zustand 的集中式状态管理
-  - **Signals**：类似 Preact Signals 的细粒度响应式状态
-  - **Context**：基于 Context API 的状态共享
-- **Store 特性**：
-  - 创建 Store（类似 Zustand）
-  - Actions（同步和异步）
-  - Selectors（选择器，避免不必要的更新）
-  - 中间件支持（日志、持久化、时间旅行等）
-  - 状态订阅和更新
-  - 类型安全（完整的 TypeScript 支持）
-- **Signals 特性**：
-  - 创建 Signal（响应式值）
-  - Computed（计算属性）
-  - Effect（副作用）
-  - 批量更新
-- **持久化**：
-  - 状态持久化到 localStorage（默认）
-  - 状态持久化到 sessionStorage（可选）
-  - 自定义持久化适配器
-  - 状态恢复和同步
-- **开发工具**：
-  - 状态调试工具
-  - 时间旅行调试
-  - 状态快照
-  - 性能监控
-
-## 使用场景
-
-- 客户端应用状态管理（Preact/React）
-- 全局状态管理
-- 组件间状态共享
-- 表单状态管理
-- UI 状态管理（主题、侧边栏等）
-
-## 安装
+## 📦 Installation
 
 ```bash
+# Deno
 deno add jsr:@dreamer/store
+
+# Bun
+bunx jsr add @dreamer/store
 ```
-
-## 环境兼容性
-
-- **运行时要求**：Deno 2.5+ 或 Bun 1.0+
-- **服务端**：❌ 不支持（纯客户端状态管理库，持久化使用 localStorage/sessionStorage，不需要服务端支持）
-- **客户端**：✅ 支持（浏览器环境，完整的客户端状态管理功能）
-- **依赖**：无外部依赖（纯 TypeScript 实现，兼容 Preact 和 React）
 
 ---
 
-## 🚀 快速开始
+## 🌍 Environment compatibility
 
-### Store 方式（推荐）
+| Environment | Support                                                    |
+| ----------- | ---------------------------------------------------------- |
+| Deno 2.6+   | ✅                                                         |
+| Bun         | ✅                                                         |
+| Server      | ❌ (client-only; persist uses localStorage when available) |
+| Browser     | ✅                                                         |
+
+---
+
+## ✨ Features (detailed)
+
+- **Store**
+  - `defineStore(key, config)` — state (required), getters, actions, persist,
+    asObject
+  - Same key → same instance; state persists across SPA page navigation
+  - In actions: direct assignment (`this.xxx = value`) or `this.setState(...)`;
+    call other actions via `this.otherAction()`
+- **Persist**
+  - Optional `persist.key` (default: store key), `persist.storage` (default:
+    localStorage), `serialize` / `deserialize`
+  - Restore on init; save on every set
+- **TypeScript**
+  - Full types for state, getters, actions, and return shapes
+
+---
+
+## 🎯 Use cases
+
+- Global client state (e.g. user, theme, UI flags)
+- SPA state that survives route changes (same store instance)
+- Optional persistence to localStorage (e.g. preferences)
+
+---
+
+## 🚀 Quick start
+
+### Single object (default, `asObject: true`)
 
 ```typescript
 import { defineStore } from "jsr:@dreamer/store";
 
-// 定义 Store 类型
-interface UserStore {
-  user: { id: number; name: string; email: string } | null;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  updateUser: (user: Partial<UserStore["user"]>) => void;
-}
-
-// 创建 Store
-// 方式1：使用 set/get（传统方式）
-const useUserStore1 = defineStore<UserStore>((set, get) => ({
-  user: null,
-  isAuthenticated: false,
-
-  login: async function (email: string, password: string) {
-    const response = await fetch("/api/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-    const user = await response.json();
-    set({ user, isAuthenticated: true });
-    // 可以使用 this 调用其他方法
-    this.updateUser({ lastLogin: new Date() });
+const store = defineStore("counter", {
+  state: { count: 0, name: "" },
+  getters: {
+    double() {
+      return this.count * 2;
+    },
   },
-
-  logout: function () {
-    set({ user: null, isAuthenticated: false });
+  actions: {
+    increment(step = 1) {
+      this.count = this.count + step;
+    },
+    setName(name: string) {
+      this.name = name;
+    },
   },
-
-  updateUser: function (updates) {
-    const currentUser = get().user;
-    if (currentUser) {
-      set({ user: { ...currentUser, ...updates } });
-    }
-  },
-}));
-
-// 方式2：直接使用 this（推荐，更简洁）
-// 注意：虽然需要传入 set 和 get 参数，但在方法中可以直接使用 this.property = value
-const useUserStore = defineStore<UserStore>((set, get, api) => ({
-  user: null,
-  isAuthenticated: false,
-
-  // 异步 Action - 直接使用 this 修改属性（无需调用 set）
-  login: async function (email: string, password: string) {
-    const response = await fetch("/api/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-    // ✅ 直接使用 this 赋值，自动同步到 store（通过 Proxy 拦截）
-    this.user = await response.json();
-    this.isAuthenticated = true;
-    // ✅ 可以使用 this 调用其他方法（推荐）
-    this.updateUser({ lastLogin: new Date() });
-    // ✅ 也可以使用 api 调用其他方法（可选）
-    // api?.updateUser({ lastLogin: new Date() });
-  },
-
-  // 同步 Action - 直接使用 this 修改属性
-  logout: function () {
-    this.user = null;
-    this.isAuthenticated = false;
-  },
-
-  // 更新部分状态 - 直接使用 this 访问和修改
-  updateUser: function (updates) {
-    if (this.user) {
-      this.user = { ...this.user, ...updates };
-    }
-  },
-}));
-
-// 在组件中使用
-function UserProfile() {
-  const user = useUserStore((state) => state.user);
-  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
-  const login = useUserStore((state) => state.login);
-  const logout = useUserStore((state) => state.logout);
-
-  if (!isAuthenticated) {
-    return <button onClick={() => login("user@example.com", "password")}>登录</button>;
-  }
-
-  return (
-    <div>
-      <p>欢迎，{user?.name}</p>
-      <button onClick={logout}>退出</button>
-    </div>
-  );
-}
-```
-
-### Signals 方式（细粒度更新）
-
-```typescript
-import { signal, computed, effect } from "jsr:@dreamer/store";
-
-// 创建 Signal
-const count = signal(0);
-const name = signal("Alice");
-
-// 计算属性
-const doubleCount = computed(() => count.value * 2);
-const greeting = computed(() => `Hello, ${name.value}!`);
-
-// 副作用
-effect(() => {
-  console.log(`Count is now: ${count.value}`);
 });
 
-// 更新值
-count.value = 10; // 自动触发依赖更新
-name.value = "Bob"; // 自动触发依赖更新
-
-// 在组件中使用
-function Counter() {
-  // 组件会自动订阅 signal，当值变化时自动更新
-  return (
-    <div>
-      <p>Count: {count.value}</p>
-      <p>Double: {doubleCount.value}</p>
-      <p>{greeting.value}</p>
-      <button onClick={() => count.value++}>+</button>
-      <button onClick={() => count.value--}>-</button>
-    </div>
-  );
-}
+// Read state and getters
+console.log(store.count, store.double);
+store.increment(2);
+store.setName("hello");
 ```
 
-### 状态持久化
+### Tuple (`asObject: false`): `[get, set, getters?, actions?]`
 
 ```typescript
-import { createStore, persist } from "jsr:@dreamer/store";
+import { defineStore } from "jsr:@dreamer/store";
 
-interface SettingsStore {
-  theme: "light" | "dark";
-  language: "zh" | "en";
-  setTheme: (theme: "light" | "dark") => void;
-  setLanguage: (language: "zh" | "en") => void;
-}
+const [get, set, actions] = defineStore("counter-tuple", {
+  state: { count: 0 },
+  actions: {
+    increment() {
+      this.count = this.count + 1;
+    },
+  },
+  asObject: false,
+}) as [
+  () => { count: number },
+  (
+    v: { count: number } | ((p: { count: number }) => { count: number }),
+  ) => void,
+  { increment: () => void },
+];
 
-// 创建带持久化的 Store（默认使用 localStorage）
-const useSettingsStore = defineStore<SettingsStore>(
-  persist(
-    (set) => ({
-      theme: "light",
-      language: "zh",
-      setTheme: (theme) => set({ theme }),
-      setLanguage: (language) => set({ language }),
-    }),
-    {
-      name: "settings", // 存储键名
-      // storage 默认为 "localStorage"，可以不指定
-      // storage: "localStorage", // 默认值，持久化到 localStorage（浏览器关闭后仍保留）
-    }
-  )
-);
-
-// 使用 sessionStorage（会话级持久化，浏览器关闭后清除）
-const useSessionStore = defineStore<SettingsStore>(
-  persist(
-    (set) => ({
-      theme: "light",
-      language: "zh",
-      setTheme: (theme) => set({ theme }),
-      setLanguage: (language) => set({ language }),
-    }),
-    {
-      name: "session-settings",
-      storage: "sessionStorage", // 使用 sessionStorage（会话级存储）
-    }
-  )
-);
-
-// 状态会自动持久化到指定的存储
-// 页面刷新后会自动恢复状态
+console.log(get().count);
+actions.increment();
+set({ count: get().count + 1 });
 ```
 
-**存储方式说明**：
-- **localStorage（默认）**：持久化存储，浏览器关闭后数据仍保留，适合用户偏好设置、主题等
-- **sessionStorage**：会话级存储，浏览器关闭后数据清除，适合临时状态、表单数据等
-
-### 中间件
+### Persist (e.g. localStorage)
 
 ```typescript
-import { createStore, logger, devtools } from "jsr:@dreamer/store";
-
-const useStore = defineStore(
-  logger( // 日志中间件
-    devtools( // 开发工具中间件
-      (set) => ({
-        count: 0,
-        increment: () => set((state) => ({ count: state.count + 1 })),
-      }),
-      { name: "MyStore" }
-    )
-  )
-);
+const store = defineStore("theme", {
+  state: { theme: "light" as "light" | "dark" },
+  actions: {
+    setTheme(theme: "light" | "dark") {
+      this.theme = theme;
+    },
+  },
+  persist: { key: "my-theme" }, // optional: storage, serialize, deserialize
+});
 ```
 
-### Selectors（选择器）
+### Actions: direct assignment and calling other actions
 
 ```typescript
-// 使用 Selector 避免不必要的更新
-function UserName() {
-  // 只订阅 user.name，当其他字段变化时不会更新
-  const userName = useUserStore((state) => state.user?.name);
-  return <p>{userName}</p>;
-}
-
-// 使用多个 Selector
-function UserInfo() {
-  const { name, email } = useUserStore((state) => ({
-    name: state.user?.name,
-    email: state.user?.email,
-  }));
-  return (
-    <div>
-      <p>Name: {name}</p>
-      <p>Email: {email}</p>
-    </div>
-  );
-}
+defineStore("counter-mixed", {
+  state: { count: 0, step: 1, history: [] as number[] },
+  actions: {
+    increment() {
+      this.count = this.count + this.step;
+      this.addToHistory();
+    },
+    addToHistory() {
+      this.history = [...this.history, this.count];
+    },
+    reset() {
+      this.count = 0;
+      this.clearHistory();
+    },
+    clearHistory() {
+      this.history = [];
+    },
+  },
+  asObject: false,
+});
 ```
 
 ---
 
-## 📚 API 文档
+## 📚 API
 
-## 与 Preact Signals 的关系
+### defineStore(key, config)
 
-- **兼容性**：`@dreamer/store` 的 Signals 方式与 Preact Signals 兼容
-- **增强功能**：提供 Store 方式，类似 Zustand，更适合复杂状态管理
-- **推荐使用**：
-  - **简单状态**：使用 Signals 方式（轻量级、高性能）
-  - **复杂状态**：使用 Store 方式（集中管理、更好的组织）
+| Parameter         | Type                                                                | Description                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `key`             | `string`                                                            | Unique key; same key returns the same store instance. Used as default persist key when `persist.key` is omitted.               |
+| `config.state`    | `T` (record)                                                        | Initial state (required). Shallow-copied.                                                                                      |
+| `config.getters`  | `Record<string, (this: T) => unknown>`                              | Optional. Each getter reads `this` (current state).                                                                            |
+| `config.actions`  | `Record<string, (this: Ctx, ...args) => any>`                       | Optional. In actions, `this` has state, `setState`, and other actions; you can use `this.xxx = value` or `this.setState(...)`. |
+| `config.persist`  | `{ key?: string, storage?: StorageLike, serialize?, deserialize? }` | Optional. Restore on init; save on set.                                                                                        |
+| `config.asObject` | `boolean`                                                           | Default `true`. `true` → single object; `false` → tuple `[get, set, getters?, actions?]`.                                      |
 
-## 📝 备注
+**Returns**: Single object (when `asObject: true`) or tuple
+`[get, set, getters?, actions?]` (when `asObject: false`).
 
-- 专为客户端状态管理设计，纯客户端库
-- 支持 Preact 和 React，API 保持一致
-- 推荐在 `_app.tsx` 中初始化全局 Store
-- 状态持久化使用 localStorage/sessionStorage，适合客户端场景
+### Auto-cleanup
+
+When the runtime supports WeakRef and FinalizationRegistry, the registry holds
+weak references to stores; when no references to the return value of
+`defineStore` remain, GC reclaims the object and a callback removes the key from
+the registry. **Only the in-memory registry is cleared**; data in persist
+storage (e.g. localStorage) is not deleted. A later `defineStore(key, config)`
+creates a new instance and restores from persist. There is no separate
+“unregister store” API; manual cleanup is usually unnecessary.
+
+### Types (exported)
+
+- `StorageLike` — `getItem(key)`, `setItem(key, value)`, optional
+  `removeItem(key)`.
+- `CreateStorePersistOptions<T>` — `key?`, `storage?`, `serialize?`,
+  `deserialize?`.
+- `CreateStoreConfig<T, G, A>` — Config shape for `defineStore`.
+- `StoreActionContextBase<T>`, `StoreActionContext<T, A>`, `StoreGetters<T>`,
+  `StoreActions<T, A>` — For typing getters/actions.
 
 ---
 
-## 🤝 贡献
+## 📋 Changelog
 
-欢迎提交 Issue 和 Pull Request！
+### [1.0.0] - 2026-02-19
+
+- **Added**: Initial stable release. defineStore (state, getters, actions,
+  persist, asObject), auto-cleanup via WeakRef/FinalizationRegistry, full
+  TypeScript types.
+- **Changed**: No separate unregister API; persist storage is not cleared by
+  auto-cleanup.
+
+Full history: [docs/en-US/CHANGELOG.md](./docs/en-US/CHANGELOG.md)
 
 ---
 
-## 📄 许可证
+## 📊 Test report
 
-MIT License - 详见 [LICENSE.md](./LICENSE.md)
+- **Date**: 2026-02-19
+- **Total**: 18 tests, 18 passed, 100%
+- **Details**: [docs/en-US/TEST_REPORT.md](./docs/en-US/TEST_REPORT.md)
 
 ---
 
-<div align="center">
+## 📝 Notes
 
-**Made with ❤️ by Dreamer Team**
+- Client-only: intended for browser/SPA; persist uses `localStorage` when
+  available.
+- Global registry: same `key` returns the same instance; state is kept across
+  SPA page navigation until no references remain (then the key may be
+  auto-removed from the registry where supported) or page reload. Auto-cleanup
+  does not delete persist data.
+- API is aligned with @dreamer/view store (direct assignment in actions,
+  getters/actions/persist shape).
 
-</div>
+---
+
+## 🤝 Contributing
+
+Issues and Pull Requests are welcome.
+
+---
+
+## 📄 License
+
+Apache-2.0 — see [LICENSE](./LICENSE).
+
+---
+
+<div align="center">**Made with ❤️ by Dreamer Team**</div>
