@@ -148,6 +148,31 @@ export interface CreateStoreConfig<
 /** 订阅函数：state 变更时调用，返回取消订阅函数 */
 export type StoreSubscribe = (listener: () => void) => () => void;
 
+/** store 内置：setState、subscribe、getState，定义 StoreType 时可与自定义 state/getters/actions 交叉，不必手写 */
+export type StoreBuiltIn<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  setState: (value: T | ((prev: T) => T)) => void;
+  subscribe: StoreSubscribe;
+  getState: () => T;
+};
+
+/** 非函数的键（省略第二泛型时自动当 state） */
+type NonFunctionKeys<T> = {
+  [K in keyof T]: T[K] extends (...args: unknown[]) => unknown ? never : K;
+}[keyof T];
+
+/** 简洁写法：T 为整 store 形态，第二泛型可省略（自动把非函数键当 state，setState 接受 Partial） */
+export type DefineStoreReturnType<
+  T extends Record<string, unknown>,
+  K extends keyof T = NonFunctionKeys<T> extends keyof T ? NonFunctionKeys<T>
+    : keyof T,
+> = Omit<StoreBuiltIn<Pick<T, K>> & T, "setState"> & {
+  setState: (
+    value: Partial<Pick<T, K>> | ((prev: Pick<T, K>) => Pick<T, K>),
+  ) => void;
+};
+
 /** 仅 state 时返回对象形态 */
 export type StoreAsObjectStateOnly<T extends Record<string, unknown>> = T & {
   setState: (value: T | ((prev: T) => T)) => void;
@@ -266,7 +291,6 @@ export function defineStore<
       | StoreAsObject<T, A>
       | StoreAsObjectWithGettersAndActions<T, G, A>;
   }
-
   const {
     state: initial,
     getters: gettersConfig,

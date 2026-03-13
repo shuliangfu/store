@@ -6,7 +6,7 @@
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-30%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
 
 📖 **Docs**: English | [中文 (Chinese)](./docs/zh-CN/README.md)
 
@@ -80,6 +80,10 @@ framework so the store triggers re-renders or effects.
   - Restore on init; save on every set
 - **TypeScript**
   - Full types for state, getters, actions, and return shapes
+  - **StoreBuiltIn\<T\>**: built-in setState, subscribe, getState (for StoreType
+    intersection)
+  - **DefineStoreReturnType\<T, K?\>**: one-object store type; T = state +
+    getters + actions, optional K = state keys (omit to infer non-function keys)
 - **Framework adapters**
   - **View**: `useStoreSignal(store)` — returns a reactive state object; read
     `state.xxx` in `createEffect` to react.
@@ -345,18 +349,20 @@ creates a new instance and restores from persist. There is no separate
 - `CreateStoreConfig<T, G, A>` — Config shape for `defineStore`.
 - `StoreActionContextBase<T>`, `StoreActionContext<T, A>`, `StoreGetters<T>`,
   `StoreActions<T, A>` — For typing getters/actions.
+- `StoreBuiltIn<T>` — setState, subscribe, getState (intersect with your
+  StoreType when needed).
+- `DefineStoreReturnType<T, K?>` — Concise store type:
+  `DefineStoreReturnType<{ count: number; double: number; increment: () => void }>`;
+  optional second generic = state keys.
 
 ---
 
 ## 📋 Changelog
 
-### [1.0.1] - 2026-03-13
+### [1.0.2] - 2026-03-14
 
-- **Added**: subscribe and getState on store; framework adapters
-  `@dreamer/store/view`, `@dreamer/store/react`, `@dreamer/store/preact`; new
-  tests for adapters.
-- **Changed**: View adapter `useStoreSignal(store)` now returns a reactive state
-  object; read `state.xxx` in `createEffect` to react to store updates.
+- **Added**: Type helpers `StoreBuiltIn<T>`, `DefineStoreReturnType<T, K?>`;
+  test report and docs updated (30 tests Deno, 27 Bun).
 
 Full history: [docs/en-US/CHANGELOG.md](./docs/en-US/CHANGELOG.md)
 
@@ -364,8 +370,8 @@ Full history: [docs/en-US/CHANGELOG.md](./docs/en-US/CHANGELOG.md)
 
 ## 📊 Test report
 
-- **Date**: 2026-03-13
-- **Total**: 27 tests, 27 passed, 100%
+- **Date**: 2026-03-11
+- **Total**: 30 tests (Deno), 27 (Bun), all passed, 100%
 - **Details**: [docs/en-US/TEST_REPORT.md](./docs/en-US/TEST_REPORT.md)
 
 ---

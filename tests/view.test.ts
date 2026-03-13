@@ -38,4 +38,27 @@ describe("useStoreSignal (view adapter)", () => {
     store.setState({ n: 2 });
     expect(state.n).toBe(2);
   });
+
+  it("返回对象可调用 setState、actions，与 store 同形", () => {
+    const store = defineStore(key + "-c", {
+      state: { n: 0 },
+      actions: {
+        inc() {
+          this.n += 1;
+        },
+      },
+    }) as {
+      n: number;
+      setState: (v: unknown) => void;
+      subscribe: (fn: () => void) => () => void;
+      getState: () => { n: number };
+      inc: () => void;
+    };
+    const state = useStoreSignal(store);
+    expect(state.n).toBe(0);
+    state.inc();
+    expect(state.n).toBe(1);
+    state.setState({ n: 10 });
+    expect(state.n).toBe(10);
+  });
 });

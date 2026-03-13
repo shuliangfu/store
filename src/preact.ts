@@ -1,12 +1,13 @@
 /**
- * Preact 响应式适配：useStore 让组件在 store 变更时重渲染
+ * Preact 响应式适配：useStore 让组件在 store 变更时重渲染，返回完整 store 可读 state 并调用 actions/getters
  *
  * 使用 preact/compat 的 useSyncExternalStore，仅依赖 Preact，无需安装 React。
  *
  * @example
  * import { useStore } from "@dreamer/store/preact";
- * const state = useStore(myStore);
- * return <span>{state.count}</span>;
+ * const storeState = useStore(myStore);
+ * return <span>{storeState.count}</span>;
+ * storeState.increment();
  */
 
 import { useSyncExternalStore } from "preact/compat";
@@ -19,11 +20,13 @@ export type SubscribableStore<T> = {
 };
 
 /**
- * 订阅 store，state 变更时触发重渲染
+ * 订阅 store，state 变更时触发重渲染；返回与 store 同形，可读 state 并调用 setState、actions、getters
  *
- * @param store - 由 defineStore 返回的 store 对象（含 subscribe、getState）
- * @returns 当前 state 快照
+ * @param store - 由 defineStore 返回的 store 对象（含 subscribe、getState、setState、actions、getters）
+ * @returns 与 store 同类型，state 变更时触发重渲染，可直接调用 store 上的方法
  */
-export function useStore<T>(store: SubscribableStore<T>): T {
-  return useSyncExternalStore(store.subscribe, store.getState);
+export function useStore<
+  S extends object & SubscribableStore<Record<string, unknown>>,
+>(store: S): S {
+  return useSyncExternalStore(store.subscribe, () => store) as S;
 }

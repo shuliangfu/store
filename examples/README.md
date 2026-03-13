@@ -52,6 +52,28 @@
 - 渐进式迁移
 - 不同方法适合不同场景的情况
 
+### 4. `view-adapter.ts` - View 适配 useStoreSignal
+
+演示 `@dreamer/store/view` 的 `useStoreSignal(store)`：返回与 store
+同形的代理，可响应式读 state、可调用 setState / actions / getters。在
+`createEffect` 里读 `storeState.xxx` 会被追踪。
+
+**运行**：`deno run -A examples/view-adapter.ts`
+
+### 5. `react-adapter.tsx` - React 适配 useStore
+
+演示 `@dreamer/store/react` 的 `useStore(store)`：在组件内使用，返回完整
+store，state 变更时重渲染，可读 state 并调用 actions。
+
+**类型检查**：`deno check examples/react-adapter.tsx`
+
+### 6. `preact-adapter.tsx` - Preact 适配 useStore
+
+演示 `@dreamer/store/preact` 的 `useStore(store)`：与 React 适配用法一致，在
+Preact 组件内使用。
+
+**类型检查**：`deno check examples/preact-adapter.tsx`
+
 ## 运行示例
 
 ```bash
@@ -64,6 +86,11 @@ deno check examples/mixed-usage.ts
 deno run --allow-net examples/with-set-get-api.ts
 deno run --allow-net examples/with-this.ts
 deno run examples/mixed-usage.ts
+deno run -A examples/view-adapter.ts
+
+# 框架适配示例仅做类型检查（需在对应框架项目中挂载组件）
+deno check examples/react-adapter.tsx
+deno check examples/preact-adapter.tsx
 ```
 
 ## 类型推断

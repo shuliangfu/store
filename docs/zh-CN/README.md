@@ -5,7 +5,7 @@
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-30%20passed-brightgreen)](./TEST_REPORT.md)
 
 📖 **文档**：[English](../../README.md) | 中文 (Chinese)
 
@@ -75,6 +75,10 @@ bunx jsr add @dreamer/store
   - 初始化时恢复；每次 set 时保存
 - **TypeScript**
   - state、getters、actions 及返回形态的完整类型
+  - **StoreBuiltIn\<T\>**：内置 setState、subscribe、getState（可与 StoreType
+    交叉）
+  - **DefineStoreReturnType\<T, K?\>**：单对象 store 类型；T 为 state +
+    getters + actions，可选 K 为 state 键名（省略则按非函数键推断）
 - **框架适配**
   - **View**：`useStoreSignal(store)` — 返回响应式 state 对象；在 `createEffect`
     中读 `state.xxx` 即可响应。
@@ -335,17 +339,20 @@ function Counter() {
 - `CreateStoreConfig<T, G, A>` — `defineStore` 的 config 类型。
 - `StoreActionContextBase<T>`、`StoreActionContext<T, A>`、`StoreGetters<T>`、`StoreActions<T, A>`
   — 用于 getters/actions 类型标注。
+- `StoreBuiltIn<T>` — setState、subscribe、getState（与 StoreType 交叉时使用）。
+- `DefineStoreReturnType<T, K?>` — 简洁 store
+  类型：`DefineStoreReturnType<{ count: number; double: number; increment: () => void }>`；可选第二泛型为
+  state 键名。
 
 ---
 
 ## 📋 变更日志
 
-### [1.0.1] - 2026-03-13
+### [1.0.2] - 2026-03-14
 
-- **新增**：store 上的 subscribe、getState；框架适配
-  `@dreamer/store/view`、`@dreamer/store/react`、`@dreamer/store/preact`；适配相关新测试。
-- **变更**：View 适配 `useStoreSignal(store)` 改为返回响应式 state 对象；在
-  `createEffect` 中读 `state.xxx` 即可响应 store 更新。
+- **新增**：类型辅助
+  `StoreBuiltIn<T>`、`DefineStoreReturnType<T, K?>`；测试报告与文档更新（30 测试
+  Deno，27 Bun）。
 
 完整历史：[CHANGELOG.md](./CHANGELOG.md)
 
@@ -353,8 +360,8 @@ function Counter() {
 
 ## 📊 测试报告
 
-- **日期**：2026-03-13
-- **总计**：27 个测试，27 通过，100%
+- **日期**：2026-03-11
+- **总计**：30 个测试（Deno），27（Bun），全部通过，100%
 - **详情**：[TEST_REPORT.md](./TEST_REPORT.md)
 
 ---

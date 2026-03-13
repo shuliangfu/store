@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.2] - 2026-03-14
+
+### Added
+
+- **Type helpers**: `StoreBuiltIn<T>` and `DefineStoreReturnType<T, K?>` for
+  concise store typing; optional second generic = state keys (omit to infer
+  non-function keys).
+- Test report and docs update: 30 tests (Deno), 27 (Bun); View/React/Preact
+  adapter tests and full-store return behaviour documented.
+
+---
+
 ## [1.0.1] - 2026-03-13
 
 ### Added
