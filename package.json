@@ -1,6 +1,6 @@
 {
   "name": "@dreamer/store",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Store utilities for Deno/Bun.",
   "type": "module",
   "license": "Apache-2.0",

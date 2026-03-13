@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.3] - 2026-03-14
+
+### Changed
+
+- **View adapter**: `useStoreSignal` now uses one signal per state field; only
+  effects that read a given field re-run when that field changes (e.g. changing
+  `contracts` no longer triggers effects that only read `web3`).
+
+---
+
 ## [1.0.2] - 2026-03-14
 
 ### Added

@@ -359,10 +359,10 @@ creates a new instance and restores from persist. There is no separate
 
 ## 📋 Changelog
 
-### [1.0.2] - 2026-03-14
+### [1.0.3] - 2026-03-14
 
-- **Added**: Type helpers `StoreBuiltIn<T>`, `DefineStoreReturnType<T, K?>`;
-  test report and docs updated (30 tests Deno, 27 Bun).
+- **Changed**: View adapter `useStoreSignal` uses per-field signals; only the
+  read field’s change triggers the effect (granular reactivity).
 
 Full history: [docs/en-US/CHANGELOG.md](./docs/en-US/CHANGELOG.md)
 

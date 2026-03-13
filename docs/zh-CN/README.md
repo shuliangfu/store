@@ -348,11 +348,10 @@ function Counter() {
 
 ## 📋 变更日志
 
-### [1.0.2] - 2026-03-14
+### [1.0.3] - 2026-03-14
 
-- **新增**：类型辅助
-  `StoreBuiltIn<T>`、`DefineStoreReturnType<T, K?>`；测试报告与文档更新（30 测试
-  Deno，27 Bun）。
+- **变更**：View 适配 `useStoreSignal` 按字段拆 signal，仅读取的字段变化时
+  effect 才重跑（细粒度响应式）。
 
 完整历史：[CHANGELOG.md](./CHANGELOG.md)
 

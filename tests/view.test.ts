@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, it } from "@dreamer/test";
+import { createEffect } from "@dreamer/view/effect";
 import { defineStore } from "../src/mod.ts";
 import { useStoreSignal } from "../src/view.ts";
 
@@ -60,5 +61,35 @@ describe("useStoreSignal (view adapter)", () => {
     expect(state.n).toBe(1);
     state.setState({ n: 10 });
     expect(state.n).toBe(10);
+  });
+
+  it("按字段拆 signal：只改 contracts 时，只读 web3 的 effect 不重跑", async () => {
+    const store = defineStore(key + "-d", {
+      state: {
+        web3: null as string | null,
+        contracts: {} as Record<string, unknown>,
+      },
+    }) as {
+      web3: string | null;
+      contracts: Record<string, unknown>;
+      setState: (v: unknown) => void;
+      subscribe: (fn: () => void) => () => void;
+      getState: () => {
+        web3: string | null;
+        contracts: Record<string, unknown>;
+      };
+    };
+    const state = useStoreSignal(store);
+    let web3ReadCount = 0;
+    createEffect(() => {
+      void state.web3;
+      web3ReadCount++;
+    });
+    expect(web3ReadCount).toBe(1);
+    store.setState({ contracts: { x: 1 } });
+    expect(web3ReadCount).toBe(1);
+    store.setState({ web3: "ok" });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(web3ReadCount).toBe(2);
   });
 });
