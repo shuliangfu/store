@@ -7,6 +7,23 @@
 
 ---
 
+## [1.0.1] - 2026-03-13
+
+### 新增
+
+- **响应式**：store 对象（`asObject: true` 时）提供 `subscribe(listener)` 与
+  `getState()`，用于框架集成。
+- **框架适配**：`@dreamer/store/view`（useStoreSignal）、`@dreamer/store/react`（useStore）、`@dreamer/store/preact`（useStore）。
+- 新增 view、react、preact 适配相关测试。
+
+### 变更
+
+- **View 适配**：`useStoreSignal(store)` 改为返回响应式 state 对象，不再返回刻度
+  getter。在 `createEffect` 中直接读取 `state.count`（或任意
+  `state.xxx`）即可响应 store 更新，无需先调用 getter。
+
+---
+
 ## [1.0.0] - 2026-02-19
 
 ### 新增

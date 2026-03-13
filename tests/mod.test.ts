@@ -209,6 +209,8 @@ describe("defineStore", () => {
       count: number;
       double: number;
       setState: (v: unknown) => void;
+      subscribe: import("../src/mod.ts").StoreSubscribe;
+      getState: () => { count: number };
       increment: () => void;
     };
 

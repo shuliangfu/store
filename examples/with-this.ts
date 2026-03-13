@@ -21,7 +21,7 @@ const store = defineStore("counter-with-this", {
       this.name = name;
     },
   },
-}) as {
+}) as unknown as {
   count: number;
   name: string;
   double: number;

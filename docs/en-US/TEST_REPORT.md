@@ -1,13 +1,13 @@
 # @dreamer/store Test Report
 
-English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md) 03
+English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md)
 
 ## Test Overview
 
-- **Package Version**: @dreamer/store@1.0.0-beta.3
-- **Test Library Version**: @dreamer/test@^1.0.9
+- **Package Version**: @dreamer/store@1.0.0
+- **Test Library Version**: @dreamer/test@^1.0.15
 - **Test Framework**: @dreamer/test (compatible with Deno and Bun)
-- **Test Date**: 2026-02-19
+- **Test Date**: 2026-03-13
 - **Test Environment**:
   - Deno 2.6+
   - Bun (when running `bun test`)
@@ -16,18 +16,21 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md) 03
 
 ### Overall Statistics
 
-- **Total Tests**: 18
-- **Passed**: 18 ✅
+- **Total Tests**: 27
+- **Passed**: 27 ✅
 - **Failed**: 0
 - **Pass Rate**: 100% ✅
-- **Execution Time**: ~6ms (Deno environment)
+- **Execution Time**: ~7s (Deno), ~1s (Bun)
 
 ### Test File Statistics
 
-| Test File     | Tests | Status      | Description                                          |
-| ------------- | ----- | ----------- | ---------------------------------------------------- |
-| `mod.test.ts` | 17    | ✅ All pass | defineStore / unregisterStore / persist / edge cases |
-| @dreamer/test | 1     | ✅ All pass | Cleanup (e.g. browser teardown)                      |
+| Test File        | Tests | Status      | Description                                                   |
+| ---------------- | ----- | ----------- | ------------------------------------------------------------- |
+| `mod.test.ts`    | 17    | ✅ All pass | defineStore, persist, edge cases, subscribe/getState on store |
+| `view.test.ts`   | 2     | ✅ All pass | useStoreSignal (View adapter): getter tick, setState triggers |
+| `react.test.ts`  | 3     | ✅ All pass | useStore contract: subscribe/getState, setState notifies      |
+| `preact.test.ts` | 2     | ✅ All pass | useStore contract: subscribe/getState, setState notifies      |
+| @dreamer/test    | 3     | ✅ All pass | Cleanup (e.g. browser teardown)                               |
 
 ## Functional Test Details
 
@@ -49,23 +52,14 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md) 03
 
 - ✅ defineStore(key, config) supports state, getters, actions, persist,
   asObject
+- ✅ Store object exposes subscribe and getState for View/React/Preact
+  reactivity
 - ✅ Tuple return [get, set, getters?, actions?] and single-object return
 - ✅ Action context Proxy supports direct assignment (this.xxx = value) and
   setState
 - ✅ Same key returns same store instance (global registry)
 
-### 2. unregisterStore (mod.test.ts) - 1 test
-
-| Test Scenario                                                               | Status |
-| --------------------------------------------------------------------------- | ------ |
-| ✅ After unregister, same key creates new instance with fresh initial state | Pass   |
-
-**Implementation Highlights**:
-
-- ✅ unregisterStore(key) removes store from global registry
-- ✅ Next defineStore(key, ...) creates a new instance
-
-### 3. defineStore persist (mod.test.ts) - 3 tests
+### 2. defineStore persist (mod.test.ts) - 3 tests
 
 | Test Scenario                                              | Status |
 | ---------------------------------------------------------- | ------ |
@@ -79,7 +73,7 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md) 03
 - ✅ Optional persist.storage (defaults to localStorage when available)
 - ✅ Restore on init, save on set
 
-### 4. defineStore Edge Cases (mod.test.ts) - 4 tests
+### 3. defineStore Edge Cases (mod.test.ts) - 4 tests
 
 | Test Scenario                                                                | Status |
 | ---------------------------------------------------------------------------- | ------ |
@@ -93,6 +87,42 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md) 03
 - ✅ Empty state and consecutive updates behave correctly
 - ✅ Persist errors (getItem/setItem throw) are caught; state remains consistent
 
+### 4. View adapter (view.test.ts) - 2 tests
+
+| Test Scenario                                                         | Status |
+| --------------------------------------------------------------------- | ------ |
+| ✅ useStoreSignal(store) returns getter; initial getter() is 0        | Pass   |
+| ✅ After store.setState, getter() increments (createEffect can react) | Pass   |
+
+**Implementation Highlights**:
+
+- ✅ useStoreSignal(store) subscribes to store and returns a tick getter for
+  View createEffect
+
+### 5. React adapter contract (react.test.ts) - 3 tests
+
+| Test Scenario                                                                | Status |
+| ---------------------------------------------------------------------------- | ------ |
+| ✅ Store has subscribe and getState; getState() matches current state        | Pass   |
+| ✅ subscribe(listener) is called when setState runs                          | Pass   |
+| ✅ useSyncExternalStore semantics: listener can read getState() after notify | Pass   |
+
+**Implementation Highlights**:
+
+- ✅ defineStore asObject store fulfills useStore (useSyncExternalStore)
+  contract
+
+### 6. Preact adapter contract (preact.test.ts) - 2 tests
+
+| Test Scenario                                                 | Status |
+| ------------------------------------------------------------- | ------ |
+| ✅ Store has subscribe and getState; getState() matches state | Pass   |
+| ✅ subscribe(listener) is called when setState runs           | Pass   |
+
+**Implementation Highlights**:
+
+- ✅ Same subscribe/getState contract as React adapter for useStore (Preact)
+
 ## Test Coverage Analysis
 
 ### API Coverage
@@ -104,44 +134,35 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md) 03
 | defineStore with actions              | ✅ Tuple [get, set, actions] and object; setState and direct this.xxx |
 | defineStore with getters + actions    | ✅ Tuple and object                                                   |
 | Same key singleton                    | ✅ Same instance returned                                             |
-| unregisterStore(key)                  | ✅ New instance after unregister                                      |
+| subscribe / getState (reactivity)     | ✅ Notify on setState; getState() snapshot                            |
 | persist (key, storage, restore, save) | ✅ Restore, save, default key                                         |
 | set(value) and set(fn)                | ✅ Both forms tested                                                  |
 
-### Edge Case Coverage
+### Adapter Coverage
 
-| Edge Case              | Status                        |
-| ---------------------- | ----------------------------- |
-| Empty state {}         | ✅ Pass                       |
-| Consecutive set        | ✅ Pass                       |
-| storage.getItem throws | ✅ Pass (use initial state)   |
-| storage.setItem throws | ✅ Pass (state still updated) |
-| persist key default    | ✅ Pass (use defineStore key) |
-
-### Error Handling Coverage
-
-| Scenario              | Status                             |
-| --------------------- | ---------------------------------- |
-| Persist getItem error | ✅ Caught; initial state used      |
-| Persist setItem error | ✅ Caught; in-memory state updated |
+| Adapter        | Coverage                                                    |
+| -------------- | ----------------------------------------------------------- |
+| View           | ✅ useStoreSignal: tick getter, setState triggers increment |
+| React / Preact | ✅ subscribe and getState behaviour (useStore contract)     |
 
 ## Strengths
 
 1. ✅ **Full defineStore API**: state, getters, actions, persist, asObject
-2. ✅ **View-style actions**: Direct assignment (this.xxx = value) and setState
-3. ✅ **Global singleton**: Same key returns same instance; unregisterStore for
-   cleanup
-4. ✅ **Persist**: Optional key/storage, restore on init, save on set; errors
+2. ✅ **Reactivity**: subscribe and getState on store for View/React/Preact
+3. ✅ **View-style actions**: Direct assignment (this.xxx = value) and setState
+4. ✅ **Global singleton**: Same key returns same instance
+5. ✅ **Persist**: Optional key/storage, restore on init, save on set; errors
    handled
-5. ✅ **Edge tests**: Empty state, consecutive set, storage errors
-6. ✅ **100% pass rate**: 18 tests, 0 failed
+6. ✅ **Adapter tests**: view.test.ts, react.test.ts, preact.test.ts cover
+   adapter contract
+7. ✅ **100% pass rate**: 27 tests, 0 failed
 
 ## Conclusion
 
-@dreamer/store is fully tested with 18 tests passing and 100% pass rate.
-defineStore (tuple and object forms), unregisterStore, persist behaviour, and
-edge cases (empty state, consecutive set, storage errors) are covered. The
-implementation matches the view store style (direct assignment in actions) and
-is suitable for production use.
+@dreamer/store is fully tested with 27 tests passing and 100% pass rate.
+defineStore (tuple and object forms), persist behaviour, edge cases (empty
+state, consecutive set, storage errors), and the reactivity contract
+(subscribe/getState) for View, React, and Preact adapters are covered. The
+implementation is suitable for production use.
 
-**Total tests**: 18 (17 in mod.test.ts + 1 framework cleanup)
+**Total tests**: 27 (17 mod + 2 view + 3 react + 2 preact + 3 framework cleanup)

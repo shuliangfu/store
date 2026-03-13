@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.1] - 2026-03-13
+
+### Added
+
+- **Reactivity**: `subscribe(listener)` and `getState()` on store object (when
+  `asObject: true`) for framework integration.
+- **Framework adapters**: `@dreamer/store/view` (useStoreSignal),
+  `@dreamer/store/react` (useStore), `@dreamer/store/preact` (useStore).
+- New tests for view, react, and preact adapters.
+
+### Changed
+
+- **View adapter**: `useStoreSignal(store)` now returns a reactive state object
+  instead of a tick getter. In `createEffect`, read `state.count` (or any
+  `state.xxx`) to react to store updates; no need to call a getter first.
+
+---
+
 ## [1.0.0] - 2026-02-19
 
 ### Added

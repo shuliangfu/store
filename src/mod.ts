@@ -145,9 +145,16 @@ export interface CreateStoreConfig<
   asObject?: boolean;
 }
 
+/** 订阅函数：state 变更时调用，返回取消订阅函数 */
+export type StoreSubscribe = (listener: () => void) => () => void;
+
 /** 仅 state 时返回对象形态 */
 export type StoreAsObjectStateOnly<T extends Record<string, unknown>> = T & {
   setState: (value: T | ((prev: T) => T)) => void;
+  /** 订阅 state 变更，用于 View/React/Preact 响应式联动 */
+  subscribe: StoreSubscribe;
+  /** 当前 state 快照（同一引用直至 setState），供 useSyncExternalStore 等使用 */
+  getState: () => T;
 };
 
 /** state + getters 时返回对象形态 */
@@ -156,6 +163,8 @@ export type StoreAsObjectWithGetters<
   G extends StoreGetters<T>,
 > = T & {
   setState: (value: T | ((prev: T) => T)) => void;
+  subscribe: StoreSubscribe;
+  getState: () => T;
 } & { [K in keyof G]: ReturnType<G[K]> };
 
 /** state + actions 时返回对象形态 */
@@ -164,6 +173,8 @@ export type StoreAsObject<
   A extends Record<string, (...args: unknown[]) => unknown>,
 > = T & {
   setState: (value: T | ((prev: T) => T)) => void;
+  subscribe: StoreSubscribe;
+  getState: () => T;
 } & A;
 
 /** state + getters + actions 时返回对象形态 */
@@ -175,6 +186,8 @@ export type StoreAsObjectWithGettersAndActions<
   & T
   & {
     setState: (value: T | ((prev: T) => T)) => void;
+    subscribe: StoreSubscribe;
+    getState: () => T;
   }
   & { [K in keyof G]: ReturnType<G[K]> }
   & A;
@@ -293,6 +306,11 @@ export function defineStore<
   }
 
   const getter = (): T => state;
+  const listeners = new Set<() => void>();
+  const subscribe: StoreSubscribe = (listener: () => void) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
   const setter = (value: T | ((prev: T) => T)): void => {
     const prev = state;
     const next = typeof value === "function"
@@ -310,6 +328,7 @@ export function defineStore<
         }
       }
     }
+    listeners.forEach((fn) => fn());
   };
 
   const hasGetters = !!gettersConfig && Object.keys(gettersConfig).length > 0;
@@ -378,6 +397,8 @@ export function defineStore<
       {
         get(_, prop: string | symbol) {
           if (prop === "setState") return setter;
+          if (prop === "subscribe") return subscribe;
+          if (prop === "getState") return getter;
           if (
             typeof prop === "string" &&
             actionsObj &&
@@ -395,7 +416,9 @@ export function defineStore<
           return (getter() as Record<string, unknown>)[prop as string];
         },
         set(_, prop: string | symbol, value: unknown) {
-          if (prop === "setState") return true;
+          if (
+            prop === "setState" || prop === "subscribe" || prop === "getState"
+          ) return true;
           if (
             typeof prop === "string" &&
             ((actionsObj &&

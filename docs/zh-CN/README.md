@@ -5,7 +5,7 @@
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-18%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./TEST_REPORT.md)
 
 📖 **文档**：[English](../../README.md) | 中文 (Chinese)
 
@@ -23,6 +23,9 @@
 - **返回形态** — `asObject: true`（默认）：单对象（如
   `store.count`、`store.increment()`）。`asObject: false`：元组
   `[get, set, getters?, actions?]`。
+- **响应式** — `asObject: true` 时，store 对象提供 `subscribe(listener)` 与
+  `getState()`，便于 View / React / Preact 在 state 变更时重渲染或重新执行
+  effect。可使用框架适配入口：`@dreamer/store/view`、`@dreamer/store/react`、`@dreamer/store/preact`。
 - **自动回收** — 在支持 WeakRef/FinalizationRegistry 的运行时中，当不再持有
   store 引用时，会从全局注册表移除该 key；仅清理内存注册表，**不影响** persist
   的 storage 数据。
@@ -38,6 +41,12 @@ deno add jsr:@dreamer/store
 # Bun
 bunx jsr add @dreamer/store
 ```
+
+**框架适配**（可选）：按所用 UI 框架选择子路径，使 store 能触发重渲染或 effect。
+
+- View：`jsr:@dreamer/store/view` → `useStoreSignal`
+- React：`jsr:@dreamer/store/react` → `useStore`（需 React 18+）
+- Preact：`jsr:@dreamer/store/preact` → `useStore`（需带 compat 的 Preact）
 
 ---
 
@@ -66,6 +75,12 @@ bunx jsr add @dreamer/store
   - 初始化时恢复；每次 set 时保存
 - **TypeScript**
   - state、getters、actions 及返回形态的完整类型
+- **框架适配**
+  - **View**：`useStoreSignal(store)` — 返回响应式 state 对象；在 `createEffect`
+    中读 `state.xxx` 即可响应。
+  - **React**：`useStore(store)` — 在 store 变更时触发重渲染的
+    hook（`useSyncExternalStore`）。
+  - **Preact**：`useStore(store)` — 与 React 相同，来自 `preact/compat`。
 
 ---
 
@@ -174,6 +189,110 @@ defineStore("counter-mixed", {
 
 ---
 
+## 🔌 框架适配（React / Preact / View）
+
+`defineStore` 在 `asObject: true` 时返回的 store 带有 **`subscribe(listener)`**
+和 **`getState()`**。使用下列入口可在 store 变更时让 UI 框架重渲染或重新执行
+effect。
+
+### View — `@dreamer/store/view`
+
+**useStoreSignal(store)** 返回响应式 state 对象。在 `createEffect` 里直接读
+`state.count`、`state.name` 等即可被追踪，store 变更时 effect 重新执行。
+
+```typescript
+import { defineStore } from "jsr:@dreamer/store";
+import { useStoreSignal } from "jsr:@dreamer/store/view";
+import { createEffect } from "@dreamer/view/effect";
+
+const store = defineStore("counter", {
+  state: { count: 0 },
+  actions: {
+    increment() {
+      this.count++;
+    },
+  },
+});
+
+const state = useStoreSignal(store);
+
+createEffect(() => {
+  console.log(state.count); // 直接读 state.count，自动监听
+});
+```
+
+| 导出                    | 说明                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `useStoreSignal(store)` | 订阅 `store`；返回响应式 state 对象。在 `createEffect` 中读 `state.xxx` 即可响应 store 更新。 |
+
+### React — `@dreamer/store/react`
+
+**useStore(store)** 返回当前 state，并在 store 变更时触发组件重渲染（内部使用
+`useSyncExternalStore`）。需 React 18+。
+
+```typescript
+import { defineStore } from "jsr:@dreamer/store";
+import { useStore } from "jsr:@dreamer/store/react";
+
+const store = defineStore("counter", {
+  state: { count: 0 },
+  actions: {
+    increment() {
+      this.count++;
+    },
+  },
+});
+
+function Counter() {
+  const state = useStore(store);
+  return (
+    <div>
+      <span>{state.count}</span>
+      <button type="button" onClick={() => store.increment()}>+1</button>
+    </div>
+  );
+}
+```
+
+| 导出              | 说明                                                          |
+| ----------------- | ------------------------------------------------------------- |
+| `useStore(store)` | 返回 `store.getState()`，并在 store 通知时触发重渲染的 hook。 |
+
+### Preact — `@dreamer/store/preact`
+
+**useStore(store)** — API 与 React 适配相同；使用 `preact/compat` 的
+`useSyncExternalStore`。无需安装 React。
+
+```typescript
+import { defineStore } from "jsr:@dreamer/store";
+import { useStore } from "jsr:@dreamer/store/preact";
+
+const store = defineStore("counter", {
+  state: { count: 0 },
+  actions: {
+    increment() {
+      this.count++;
+    },
+  },
+});
+
+function Counter() {
+  const state = useStore(store);
+  return (
+    <div>
+      <span>{state.count}</span>
+      <button type="button" onClick={() => store.increment()}>+1</button>
+    </div>
+  );
+}
+```
+
+| 导出              | 说明                                                             |
+| ----------------- | ---------------------------------------------------------------- |
+| `useStore(store)` | 与 React 相同：返回当前 state，store 变更时重渲染（仅 Preact）。 |
+
+---
+
 ## 📚 API
 
 ### defineStore(key, config)
@@ -198,10 +317,19 @@ defineStore("counter-mixed", {
 等 storage 中的数据；之后再次 `defineStore(key, config)` 会新建 实例并从 persist
 恢复。无单独“移除 store”的 API，一般无需手动清理。
 
+### Store 对象（`asObject: true` 时）：subscribe 与 getState
+
+- **`store.subscribe(listener: () => void): () => void`** — 订阅 state
+  变更。每次 `setState` 或 action 内直接赋值后调用。返回取消订阅函数。
+- **`store.getState(): T`** — 返回当前 state 快照（同一引用直至下次更新）。供
+  `useStore`（React/Preact）及自定义订阅使用。
+
 ### 类型（导出）
 
 - `StorageLike` — `getItem(key)`、`setItem(key, value)`、可选
   `removeItem(key)`。
+- `StoreSubscribe` — `subscribe`
+  的类型：`(listener: () => void) => () => void`。
 - `CreateStorePersistOptions<T>` —
   `key?`、`storage?`、`serialize?`、`deserialize?`。
 - `CreateStoreConfig<T, G, A>` — `defineStore` 的 config 类型。
@@ -212,11 +340,12 @@ defineStore("counter-mixed", {
 
 ## 📋 变更日志
 
-### [1.0.0] - 2026-02-19
+### [1.0.1] - 2026-03-13
 
-- **新增**：首个稳定版。defineStore（state、getters、actions、persist、asObject），WeakRef/FinalizationRegistry
-  自动回收，完整 TypeScript 类型。
-- **变更**：无单独 unregister API；自动回收不清理 persist 存储。
+- **新增**：store 上的 subscribe、getState；框架适配
+  `@dreamer/store/view`、`@dreamer/store/react`、`@dreamer/store/preact`；适配相关新测试。
+- **变更**：View 适配 `useStoreSignal(store)` 改为返回响应式 state 对象；在
+  `createEffect` 中读 `state.xxx` 即可响应 store 更新。
 
 完整历史：[CHANGELOG.md](./CHANGELOG.md)
 
@@ -224,9 +353,9 @@ defineStore("counter-mixed", {
 
 ## 📊 测试报告
 
-- **日期**：2026-02-19
-- **总计**：18 个测试，18 通过，100%
-- **详情**：[docs/zh-CN/TEST_REPORT.md](./TEST_REPORT.md)
+- **日期**：2026-03-13
+- **总计**：27 个测试，27 通过，100%
+- **详情**：[TEST_REPORT.md](./TEST_REPORT.md)
 
 ---
 
@@ -238,6 +367,8 @@ defineStore("counter-mixed", {
   自动回收仅清理内存注册表，不删除 persist 数据。
 - API 与 @dreamer/view store 对齐（action 内直接赋值，getters/actions/persist
   形态一致）。
+- 响应式：通过 `store.subscribe` 与 `store.getState` 配合 View/React/Preact
+  适配，可在 store 变更时更新组件或 effect。
 
 ---
 
