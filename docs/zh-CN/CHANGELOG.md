@@ -7,6 +7,23 @@
 
 ---
 
+## [1.0.4] - 2026-03-22
+
+### 修复
+
+- **View 适配（`@dreamer/store/view`）**：`useStoreSignal` 改为使用
+  **@dreamer/view** 的 **`SignalRef`**（**`createSignal`** 通过 **`.value`**
+  读/写），修复在 **@dreamer/view@1.3+** 下运行时出现
+  **`createSignal is not a function or its return value is not iterable`**
+  的问题（View 已取消元组解构形态）。
+
+### 变更
+
+- **依赖**：**@dreamer/view** **^1.3.4**（`deno.json` / `package.json`
+  已对齐）。
+
+---
+
 ## [1.0.3] - 2026-03-14
 
 ### 变更

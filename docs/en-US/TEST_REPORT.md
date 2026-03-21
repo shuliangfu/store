@@ -4,10 +4,10 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md)
 
 ## Test Overview
 
-- **Package Version**: @dreamer/store@1.0.1
+- **Package Version**: @dreamer/store@1.0.4
 - **Test Library Version**: @dreamer/test@^1.0.15
 - **Test Framework**: @dreamer/test (compatible with Deno and Bun)
-- **Test Date**: 2026-03-11
+- **Test Date**: 2026-03-22
 - **Test Environment**:
   - Deno 2.6+
   - Bun (when running `bun test`)
@@ -24,12 +24,12 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md)
 
 ### Test File Statistics
 
-| Test File        | Tests | Status      | Description                                                                  |
-| ---------------- | ----- | ----------- | ---------------------------------------------------------------------------- |
-| `mod.test.ts`    | 17    | ✅ All pass | defineStore, persist, edge cases, subscribe/getState on store                |
-| `view.test.ts`   | 4     | ✅ All pass | useStoreSignal: reactive state read, setState triggers, full store shape     |
-| `react.test.ts`  | 5     | ✅ All pass | useStore contract + useStore(store) returns full store, read state & actions |
-| `preact.test.ts` | 4     | ✅ All pass | useStore contract + useStore(store) returns full store, read state & actions |
+| Test File        | Tests | Status      | Description                                                                    |
+| ---------------- | ----- | ----------- | ------------------------------------------------------------------------------ |
+| `mod.test.ts`    | 17    | ✅ All pass | defineStore, persist, edge cases, subscribe/getState on store                  |
+| `view.test.ts`   | 5     | ✅ All pass | useStoreSignal: SignalRef + granular field effects, setState, full store shape |
+| `react.test.ts`  | 5     | ✅ All pass | useStore contract + useStore(store) returns full store, read state & actions   |
+| `preact.test.ts` | 4     | ✅ All pass | useStore contract + useStore(store) returns full store, read state & actions   |
 
 ## Functional Test Details
 
@@ -86,18 +86,20 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md)
 - ✅ Empty state and consecutive updates behave correctly
 - ✅ Persist errors (getItem/setItem throw) are caught; state remains consistent
 
-### 4. View adapter (view.test.ts) - 4 tests
+### 4. View adapter (view.test.ts) - 5 tests
 
-| Test Scenario                                                                 | Status |
-| ----------------------------------------------------------------------------- | ------ |
-| ✅ useStoreSignal(store) returns reactive state object; direct read matches   | Pass   |
-| ✅ After store.setState, state.xxx reflects new value; createEffect can react | Pass   |
-| ✅ Returned object supports setState, actions, same shape as store            | Pass   |
+| Test Scenario                                                                           | Status |
+| --------------------------------------------------------------------------------------- | ------ |
+| ✅ useStoreSignal(store) returns reactive state object; direct read matches             | Pass   |
+| ✅ After store.setState, state.xxx reflects new value; createEffect can react           | Pass   |
+| ✅ Returned object supports setState, actions, same shape as store                      | Pass   |
+| ✅ Per-field signals: changing one field does not re-run effects that only read another | Pass   |
 
 **Implementation Highlights**:
 
 - ✅ useStoreSignal(store) subscribes to store and returns a proxy: state keys
-  are reactive, actions/getters/setState are forwarded to the store.
+  use **@dreamer/view** **SignalRef** (`.value`), actions/getters/setState are
+  forwarded to the store.
 
 ### 5. React adapter (react.test.ts) - 5 tests
 
@@ -144,10 +146,10 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md)
 
 ### Adapter Coverage
 
-| Adapter        | Coverage                                                                    |
-| -------------- | --------------------------------------------------------------------------- |
-| View           | ✅ useStoreSignal: reactive state read, setState triggers, full store shape |
-| React / Preact | ✅ subscribe, getState; useStore(store) returns full store, state + actions |
+| Adapter        | Coverage                                                                       |
+| -------------- | ------------------------------------------------------------------------------ |
+| View           | ✅ useStoreSignal: SignalRef per field, granular effects, setState, full store |
+| React / Preact | ✅ subscribe, getState; useStore(store) returns full store, state + actions    |
 
 ## Strengths
 
@@ -165,11 +167,11 @@ English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md)
 
 ## Conclusion
 
-@dreamer/store is fully tested with 30 tests passing (Deno) and 100% pass rate.
+@dreamer/store is fully tested with 31 tests passing (Deno) and 100% pass rate.
 defineStore (tuple and object forms), persist behaviour, edge cases, reactivity
 (subscribe/getState), and View/React/Preact adapters (useStoreSignal, useStore
 returning full store) are covered. StoreBuiltIn and DefineStoreReturnType
 support concise store typing. The implementation is suitable for production use.
 
-**Total tests**: 30 (17 mod + 4 view + 5 react + 4 preact; Bun reports 27 per
-file set).
+**Total tests**: 31 (17 mod + 5 view + 5 react + 4 preact; Bun reports 28 for
+the same file set).

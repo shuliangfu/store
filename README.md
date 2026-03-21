@@ -6,7 +6,7 @@
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-30%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-31%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
 
 📖 **Docs**: English | [中文 (Chinese)](./docs/zh-CN/README.md)
 
@@ -359,10 +359,11 @@ creates a new instance and restores from persist. There is no separate
 
 ## 📋 Changelog
 
-### [1.0.3] - 2026-03-14
+### [1.0.4] - 2026-03-22
 
-- **Changed**: View adapter `useStoreSignal` uses per-field signals; only the
-  read field’s change triggers the effect (granular reactivity).
+- **Fixed**: View adapter `useStoreSignal` uses **`SignalRef`** (`.value`) with
+  **@dreamer/view@1.3+** `createSignal`. **Changed**: **@dreamer/view**
+  **^1.3.4**.
 
 Full history: [docs/en-US/CHANGELOG.md](./docs/en-US/CHANGELOG.md)
 
@@ -370,8 +371,8 @@ Full history: [docs/en-US/CHANGELOG.md](./docs/en-US/CHANGELOG.md)
 
 ## 📊 Test report
 
-- **Date**: 2026-03-11
-- **Total**: 30 tests (Deno), 27 (Bun), all passed, 100%
+- **Date**: 2026-03-22
+- **Total**: 31 tests (Deno), 28 (Bun), all passed, 100%
 - **Details**: [docs/en-US/TEST_REPORT.md](./docs/en-US/TEST_REPORT.md)
 
 ---

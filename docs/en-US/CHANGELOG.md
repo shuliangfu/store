@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.4] - 2026-03-22
+
+### Fixed
+
+- **View adapter (`@dreamer/store/view`)**: `useStoreSignal` now uses
+  **`SignalRef`** from **`@dreamer/view`** (`createSignal` returns `.value`
+  read/write), fixing runtime
+  **`createSignal is not a function or its return value is not iterable`** when
+  used with **@dreamer/view@1.3+** (tuple destructuring removed in View).
+
+### Changed
+
+- **Dependencies**: **@dreamer/view** **^1.3.4** (in `deno.json` /
+  `package.json`).
+
+---
+
 ## [1.0.3] - 2026-03-14
 
 ### Changed

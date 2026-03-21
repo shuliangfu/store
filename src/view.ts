@@ -12,7 +12,7 @@
  * storeState.increment();  // 调用 action
  */
 
-import { createSignal } from "@dreamer/view/signal";
+import { createSignal, type SignalRef } from "@dreamer/view/signal";
 import type { StoreSubscribe } from "./mod.ts";
 
 /** 带 subscribe 与 getState 的 store（defineStore 单对象形态） */
@@ -21,8 +21,8 @@ export type SubscribableStore<T = Record<string, unknown>> = {
   getState: () => T;
 };
 
-/** 单字段 signal：getter + setter */
-type FieldSignal = [() => unknown, (v: unknown) => void];
+/** 每个 state 字段对应一个 View {@link SignalRef}（`.value` 读/写，与 createSignal 新 API 一致） */
+type FieldSignal = SignalRef<unknown>;
 
 /**
  * 返回与 store 同形的代理：每个 state 字段对应独立 signal，仅该字段变化时依赖它的 effect 才重跑；其余透传
@@ -39,8 +39,8 @@ export function useStoreSignal<
   const lastValues: Record<string, unknown> = {};
 
   for (const key of stateKeys) {
-    const [get, set] = createSignal(state[key as keyof typeof state]);
-    signals[key] = [get, set];
+    const sig = createSignal(state[key as keyof typeof state]);
+    signals[key] = sig;
     lastValues[key] = state[key as keyof typeof state];
   }
 
@@ -50,14 +50,14 @@ export function useStoreSignal<
     for (const key of keysToUpdate) {
       const newVal = newState[key as keyof typeof newState];
       if (!(key in signals)) {
-        const [get, set] = createSignal(newVal);
-        signals[key] = [get, set];
+        const sig = createSignal(newVal);
+        signals[key] = sig;
         lastValues[key] = newVal;
         continue;
       }
       if (newVal !== lastValues[key]) {
         lastValues[key] = newVal;
-        signals[key][1](newVal);
+        signals[key].value = newVal;
       }
     }
   });
@@ -65,7 +65,7 @@ export function useStoreSignal<
   return new Proxy(store, {
     get(target, prop: string) {
       if (signals[prop]) {
-        return signals[prop][0]();
+        return signals[prop].value;
       }
       return (target as Record<string, unknown>)[prop];
     },

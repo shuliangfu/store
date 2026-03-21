@@ -5,7 +5,7 @@
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-30%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-31%20passed-brightgreen)](./TEST_REPORT.md)
 
 📖 **文档**：[English](../../README.md) | 中文 (Chinese)
 
@@ -348,10 +348,10 @@ function Counter() {
 
 ## 📋 变更日志
 
-### [1.0.3] - 2026-03-14
+### [1.0.4] - 2026-03-22
 
-- **变更**：View 适配 `useStoreSignal` 按字段拆 signal，仅读取的字段变化时
-  effect 才重跑（细粒度响应式）。
+- **修复**：View 适配 `useStoreSignal` 与 **@dreamer/view@1.3+** 的
+  **`SignalRef`** （**`.value`**）对齐。**变更**：**@dreamer/view** **^1.3.4**。
 
 完整历史：[CHANGELOG.md](./CHANGELOG.md)
 
@@ -359,8 +359,8 @@ function Counter() {
 
 ## 📊 测试报告
 
-- **日期**：2026-03-11
-- **总计**：30 个测试（Deno），27（Bun），全部通过，100%
+- **日期**：2026-03-22
+- **总计**：31 个测试（Deno），28（Bun），全部通过，100%
 - **详情**：[TEST_REPORT.md](./TEST_REPORT.md)
 
 ---

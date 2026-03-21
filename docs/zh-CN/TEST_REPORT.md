@@ -4,10 +4,10 @@
 
 ## 测试概览
 
-- **包版本**：@dreamer/store@1.0.1
+- **包版本**：@dreamer/store@1.0.4
 - **测试库版本**：@dreamer/test@^1.0.15
 - **测试框架**：@dreamer/test（兼容 Deno 与 Bun）
-- **测试日期**：2026-03-11
+- **测试日期**：2026-03-22
 - **测试环境**：
   - Deno 2.6+
   - Bun（运行 `bun test` 时）
@@ -16,18 +16,18 @@
 
 ### 总体统计
 
-- **总测试数**：30（Deno），27（Bun；按文件集计）
-- **通过**：30 ✅
+- **总测试数**：31（Deno），28（Bun；按文件集计，含各文件内框架清理用例）
+- **通过**：31 ✅（Deno）、28 ✅（Bun）
 - **失败**：0
 - **通过率**：100% ✅
-- **执行时间**：约 1s（Deno）、约 0.7s（Bun）
+- **执行时间**：约 2–5s（Deno）、约 2s（Bun）
 
 ### 测试文件统计
 
 | 测试文件         | 测试数 | 状态        | 说明                                                                    |
 | ---------------- | ------ | ----------- | ----------------------------------------------------------------------- |
 | `mod.test.ts`    | 17     | ✅ 全部通过 | defineStore、persist、边界；store 的 subscribe/getState                 |
-| `view.test.ts`   | 4      | ✅ 全部通过 | useStoreSignal：响应式读 state、setState 触发、完整 store 形态          |
+| `view.test.ts`   | 5      | ✅ 全部通过 | useStoreSignal：SignalRef、按字段 effect、setState、完整 store 形态     |
 | `react.test.ts`  | 5      | ✅ 全部通过 | useStore 契约 + useStore(store) 返回完整 store，可读 state 并调 actions |
 | `preact.test.ts` | 4      | ✅ 全部通过 | useStore 契约 + useStore(store) 返回完整 store，可读 state 并调 actions |
 
@@ -83,18 +83,19 @@
 - ✅ 空 state 与连续更新行为正确
 - ✅ persist 异常（getItem/setItem 抛错）被捕获，状态保持一致
 
-### 4. View 适配 (view.test.ts) - 4 个测试
+### 4. View 适配 (view.test.ts) - 5 个测试
 
 | 测试场景                                                            | 状态 |
 | ------------------------------------------------------------------- | ---- |
 | ✅ useStoreSignal(store) 返回响应式 state 对象，直接读与 store 一致 | 通过 |
 | ✅ store.setState 后 state.xxx 为新值，createEffect 可据此响应      | 通过 |
 | ✅ 返回对象可调用 setState、actions，与 store 同形                  | 通过 |
+| ✅ 按字段拆 signal：只改部分字段时，仅读其他字段的 effect 不重跑    | 通过 |
 
 **实现要点**：
 
-- ✅ useStoreSignal(store) 订阅 store 并返回代理：state
-  键响应式，actions/getters/setState 透传至 store。
+- ✅ useStoreSignal(store) 订阅 store 并返回代理：state 键使用 **@dreamer/view**
+  **SignalRef**（**`.value`**），actions/getters/setState 透传至 store。
 
 ### 5. React 适配 (react.test.ts) - 5 个测试
 
@@ -140,10 +141,10 @@
 
 ### 适配器覆盖
 
-| 适配器         | 覆盖情况                                                                |
-| -------------- | ----------------------------------------------------------------------- |
-| View           | ✅ useStoreSignal：响应式读 state、setState 触发、完整 store 形态       |
-| React / Preact | ✅ subscribe、getState；useStore(store) 返回完整 store，state + actions |
+| 适配器         | 覆盖情况                                                                 |
+| -------------- | ------------------------------------------------------------------------ |
+| View           | ✅ useStoreSignal：SignalRef 按字段、细粒度 effect、setState、完整 store |
+| React / Preact | ✅ subscribe、getState；useStore(store) 返回完整 store，state + actions  |
 
 ## 优点
 
@@ -160,10 +161,10 @@
 
 ## 结论
 
-@dreamer/store 已通过全部 30 个测试（Deno），通过率
+@dreamer/store 已通过全部 31 个测试（Deno），通过率
 100%。defineStore（元组与单对象形态）、persist
 行为、边界情况、响应式契约（subscribe/getState）以及 View/React/Preact
 适配（useStoreSignal、useStore 返回完整 store）均有覆盖。StoreBuiltIn 与
 DefineStoreReturnType 支持简洁的 store 类型书写。可用于生产环境。
 
-**总测试数**：30（mod 17 + view 4 + react 5 + preact 4；Bun 按文件集计为 27）。
+**总测试数**：31（mod 17 + view 5 + react 5 + preact 4；Bun 按文件集计为 28）。
