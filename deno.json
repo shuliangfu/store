@@ -36,11 +36,11 @@
     }
   },
   "imports": {
-    "@dreamer/view": "jsr:@dreamer/view@^1.3.4",
+    "@dreamer/view": "jsr:@dreamer/view@^1.3.6",
     "@dreamer/test": "jsr:@dreamer/test@^1.0.15",
     "react": "npm:react@19.2.4",
     "react-dom/client": "npm:react-dom@19.2.4/client",
-    "preact": "npm:preact@10.28.3"
+    "preact": "npm:preact@^10.29.2"
   },
   "nodeModulesDir": "auto",
   "tests": {
