@@ -1,11 +1,11 @@
 # @dreamer/store
 
-> 与 @dreamer/view store 相同风格的客户端状态管理库：按 key 的全局
-> store、getters、actions，以及可选的持久化。
+> 与 @dreamer/view store 相同风格的客户端状态管理库（Deno / Bun / Node.js 22+）：
+> 按 key 的全局 store、getters、actions，以及可选的持久化。
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-31%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-Deno%2FBun%2FNode-brightgreen)](./TEST_REPORT.md)
 
 📖 **文档**：[English](../../README.md) | 中文 (Chinese)
 
@@ -40,6 +40,9 @@ deno add jsr:@dreamer/store
 
 # Bun
 bunx jsr add @dreamer/store
+
+# Node.js 22+
+npx jsr add @dreamer/store
 ```
 
 **框架适配**（可选）：按所用 UI 框架选择子路径，使 store 能触发重渲染或 effect。
@@ -52,12 +55,13 @@ bunx jsr add @dreamer/store
 
 ## 🌍 环境兼容性
 
-| 环境      | 支持                                              |
-| --------- | ------------------------------------------------- |
-| Deno 2.6+ | ✅                                                |
-| Bun       | ✅                                                |
-| 服务端    | ❌（仅客户端；persist 在可用时使用 localStorage） |
-| 浏览器    | ✅                                                |
+| 环境          | 版本   | 支持                                              |
+| ------------- | ------ | ------------------------------------------------- |
+| **Deno**      | 2.6+   | ✅                                                |
+| **Bun**       | 1.3+   | ✅                                                |
+| **Node.js**   | 22+    | ✅                                                |
+| 服务端        | -      | ❌（仅客户端；persist 在可用时使用 localStorage） |
+| 浏览器        | -      | ✅                                                |
 
 ---
 

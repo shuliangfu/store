@@ -2,34 +2,59 @@
 
 [English](../en-US/TEST_REPORT.md) | 中文 (Chinese)
 
-## 测试概览
+## 📊 测试概览
 
-- **包版本**：@dreamer/store@1.0.4
-- **测试库版本**：@dreamer/test@^1.0.15
-- **测试框架**：@dreamer/test（兼容 Deno 与 Bun）
-- **测试日期**：2026-03-22
-- **测试环境**：
-  - Deno 2.6+
-  - Bun（运行 `bun test` 时）
+- **包**：`@dreamer/store`
+- **版本**：**1.1.0**（与 `deno.json`/`package.json` 对齐）
+- **测试框架**：@dreamer/test@^1.2.3
+- **报告日期**：**2026-07-23**
+- **测试环境**：Deno 2.9+ / Bun 1.3+ / Node.js 22+
 
-## 测试结果
+---
 
-### 总体统计
+## 运行方式
 
-- **总测试数**：31（Deno），28（Bun；按文件集计，含各文件内框架清理用例）
-- **通过**：31 ✅（Deno）、28 ✅（Bun）
-- **失败**：0
-- **通过率**：100% ✅
-- **执行时间**：约 2–5s（Deno）、约 2s（Bun）
+在 **store 包根目录**下执行：
+
+```bash
+# Deno
+deno task test
+
+# Bun
+bun test tests/
+
+# Node.js 22+
+npm install
+npm run test:node
+# 等价于：node --import tsx --test-force-exit test-node.mjs
+```
+
+---
+
+## 📈 测试结果
+
+### 运行时兼容性
+
+| 运行时   | 版本   | 通过    | 失败  | 文件数 | 耗时    |
+| -------- | ------ | ------- | ----- | ------ | ------- |
+| Deno     | 2.9+   | **31**  | **0** | 4      | ~0.2s   |
+| Bun      | 1.3+   | **27**  | **0** | 4      | ~0.06s  |
+| Node.js  | 22+    | **4/4** | **0** | 4      | ~5s     |
+
+> 4 个测试文件均为纯单元测试——无浏览器测试、无外部服务、无需排除项。
+> Deno/Bun 计数因运行器统计口径不同而异（框架清理用例按文件计一次），
+> 以 **0 失败** 为不变量。
 
 ### 测试文件统计
 
-| 测试文件         | 测试数 | 状态        | 说明                                                                    |
-| ---------------- | ------ | ----------- | ----------------------------------------------------------------------- |
-| `mod.test.ts`    | 17     | ✅ 全部通过 | defineStore、persist、边界；store 的 subscribe/getState                 |
-| `view.test.ts`   | 5      | ✅ 全部通过 | useStoreSignal：SignalRef、按字段 effect、setState、完整 store 形态     |
-| `react.test.ts`  | 5      | ✅ 全部通过 | useStore 契约 + useStore(store) 返回完整 store，可读 state 并调 actions |
-| `preact.test.ts` | 4      | ✅ 全部通过 | useStore 契约 + useStore(store) 返回完整 store，可读 state 并调 actions |
+| #  | 测试文件         | 测试数 | 状态        | 说明                                                                    |
+| -- | ---------------- | ------ | ----------- | ----------------------------------------------------------------------- |
+| 1  | `mod.test.ts`    | 17     | ✅ 全部通过 | defineStore、persist、边界；store 的 subscribe/getState                 |
+| 2  | `view.test.ts`   | 5      | ✅ 全部通过 | useStoreSignal：Signal、按字段 effect、setState、完整 store 形态        |
+| 3  | `react.test.ts`  | 5      | ✅ 全部通过 | useStore 契约 + useStore(store) 返回完整 store，可读 state 并调 actions |
+| 4  | `preact.test.ts` | 4      | ✅ 全部通过 | useStore 契约 + useStore(store) 返回完整 store，可读 state 并调 actions |
+
+---
 
 ## 功能测试详情
 

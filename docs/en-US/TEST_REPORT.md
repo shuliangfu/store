@@ -2,34 +2,60 @@
 
 English | [中文 (Chinese)](../zh-CN/TEST_REPORT.md)
 
-## Test Overview
+## 📊 Test Overview
 
-- **Package Version**: @dreamer/store@1.0.4
-- **Test Library Version**: @dreamer/test@^1.0.15
-- **Test Framework**: @dreamer/test (compatible with Deno and Bun)
-- **Test Date**: 2026-03-22
-- **Test Environment**:
-  - Deno 2.6+
-  - Bun (when running `bun test`)
+- **Package**: `@dreamer/store`
+- **Version**: **1.1.0** (aligned with `deno.json`/`package.json`)
+- **Test framework**: @dreamer/test@^1.2.3
+- **Report date**: **2026-07-23**
+- **Test environment**: Deno 2.9+ / Bun 1.3+ / Node.js 22+
 
-## Test Results
+---
 
-### Overall Statistics
+## How to Run
 
-- **Total Tests**: 30 (Deno), 27 (Bun; framework cleanup counted once per file)
-- **Passed**: 30 ✅
-- **Failed**: 0
-- **Pass Rate**: 100% ✅
-- **Execution Time**: ~1s (Deno), ~0.7s (Bun)
+From the **store package root**:
+
+```bash
+# Deno
+deno task test
+
+# Bun
+bun test tests/
+
+# Node.js 22+
+npm install
+npm run test:node
+# equivalent: node --import tsx --test-force-exit test-node.mjs
+```
+
+---
+
+## 📈 Test Results
+
+### Runtime Compatibility
+
+| Runtime  | Version | Passed  | Failed | Files | Duration |
+| -------- | ------- | ------- | ------ | ----- | -------- |
+| Deno     | 2.9+    | **31**  | **0**  | 4     | ~0.2s    |
+| Bun      | 1.3+    | **27**  | **0**  | 4     | ~0.06s   |
+| Node.js  | 22+     | **4/4** | **0**  | 4     | ~5s      |
+
+> All 4 test files are pure unit tests — no browser tests, no external services,
+> no exclusions needed. Deno/Bun counts differ due to runner counting
+> conventions (framework cleanup counted once per file); treat **0 failures** as
+> the invariant.
 
 ### Test File Statistics
 
-| Test File        | Tests | Status      | Description                                                                    |
-| ---------------- | ----- | ----------- | ------------------------------------------------------------------------------ |
-| `mod.test.ts`    | 17    | ✅ All pass | defineStore, persist, edge cases, subscribe/getState on store                  |
-| `view.test.ts`   | 5     | ✅ All pass | useStoreSignal: SignalRef + granular field effects, setState, full store shape |
-| `react.test.ts`  | 5     | ✅ All pass | useStore contract + useStore(store) returns full store, read state & actions   |
-| `preact.test.ts` | 4     | ✅ All pass | useStore contract + useStore(store) returns full store, read state & actions   |
+| #  | Test File        | Tests | Status        | Description                                                                    |
+| -- | ---------------- | ----- | ------------- | ------------------------------------------------------------------------------ |
+| 1  | `mod.test.ts`    | 17    | ✅ All passed | defineStore, persist, edge cases, subscribe/getState on store                  |
+| 2  | `view.test.ts`   | 5     | ✅ All passed | useStoreSignal: Signal + granular field effects, setState, full store shape    |
+| 3  | `react.test.ts`  | 5     | ✅ All passed | useStore contract + useStore(store) returns full store, read state & actions   |
+| 4  | `preact.test.ts` | 4     | ✅ All passed | useStore contract + useStore(store) returns full store, read state & actions   |
+
+---
 
 ## Functional Test Details
 

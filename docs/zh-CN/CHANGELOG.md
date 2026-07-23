@@ -7,6 +7,37 @@
 
 ---
 
+## [1.1.0] - 2026-07-23
+
+### 新增
+
+- **Node.js 22+ 兼容**：全面支持 Node.js 22+，与 Deno、Bun 三端并行。
+  `@dreamer/view` 升级至 ^2.2.0（Node 兼容版），`@dreamer/test` 升级至 ^1.2.3。
+- **Node.js 测试基础设施**：`test-node.mjs` 运行器（主进程执行，无 fork/IPC）、
+  `tsconfig.json`（Bundler 模块解析）、deno.json 与 package.json 中新增
+  `test:node` 脚本。
+- **9 任务 CI 矩阵**：3 Deno v2.9 + 3 Bun + 3 Node 22（Linux/macOS/Windows）。
+  无 Chromium、无外部服务——4 个测试文件均为纯单元测试。
+- package.json 新增 `engines.node: ">=22"` 与 `engines.bun: ">=1.3"`。
+- deno.json 新增 `nodeModulesDir: "auto"` 与 `minimumDependencyAge: "0"` 以支持
+  JSR 依赖解析。
+- 新增 `react-dom` 依赖（`@dreamer/view` 的 React 服务端渲染类型所需）。
+
+### 变更
+
+- **View 适配 API 迁移**：`@dreamer/view@2.x` 将 `createSignal`/`createEffect`/
+  `Signal` 移至 `@dreamer/view/reactivity` 子路径，移除了旧的
+  `@dreamer/view/signal` 与 `@dreamer/view/effect` 子路径。`src/view.ts` 已更新为
+  从 `@dreamer/view/reactivity` 导入；`SignalRef` 类型更名为 `Signal`。
+- `deno.json` 与 `package.json` 依赖版本同步（均使用 `^` 范围）。
+
+### 说明
+
+- **src 运行时无关**：零 `Deno.*` API 调用、零 `IS_NODE` 检查——纯逻辑 + 跨运行时
+  Web API。除 View v2 API 迁移外，无需任何源码改动即可支持 Node.js。
+
+---
+
 ## [1.0.4] - 2026-03-22
 
 ### 修复

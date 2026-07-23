@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] - 2026-07-23
+
+### Added
+
+- **Node.js 22+ compatibility**: Full support for Node.js 22+ alongside Deno and
+  Bun. `@dreamer/view` upgraded to ^2.2.0 (Node-compatible), `@dreamer/test` to
+  ^1.2.3.
+- **Node.js test infrastructure**: `test-node.mjs` runner (main-process execution,
+  no fork/IPC), `tsconfig.json` (Bundler module resolution), `test:node` script
+  in deno.json and package.json.
+- **9-job CI matrix**: 3 Deno v2.9 + 3 Bun + 3 Node 22 (Linux/macOS/Windows).
+  No Chromium, no external services — all 4 test files are pure unit tests.
+- `engines.node: ">=22"` and `engines.bun: ">=1.3"` in package.json.
+- `nodeModulesDir: "auto"` and `minimumDependencyAge: "0"` in deno.json for JSR
+  dependency resolution.
+- `react-dom` dependency added (required by `@dreamer/view` React server-side
+  rendering types).
+
+### Changed
+
+- **View adapter API migration**: `@dreamer/view@2.x` moved `createSignal`/
+  `createEffect`/`Signal` to the `@dreamer/view/reactivity` subpath and removed
+  the legacy `@dreamer/view/signal` and `@dreamer/view/effect` subpaths.
+  `src/view.ts` updated to import from `@dreamer/view/reactivity`; `SignalRef`
+  type renamed to `Signal`.
+- `deno.json` and `package.json` dependency versions synchronized (both use `^`
+  ranges).
+
+### Notes
+
+- **src is runtime-agnostic**: zero `Deno.*` API calls, zero `IS_NODE` checks —
+  pure logic + cross-runtime Web API. No source code changes were needed for
+  Node.js support beyond the View v2 API migration.
+
+---
+
 ## [1.0.4] - 2026-03-22
 
 ### Fixed

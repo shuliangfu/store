@@ -1,12 +1,12 @@
 # @dreamer/store
 
-> A client-side state management library with the same API style as
-> @dreamer/view store: global keyed stores, getters, actions, and optional
-> persist.
+> A client-side state management library (Deno / Bun / Node.js 22+) with the same
+> API style as @dreamer/view store: global keyed stores, getters, actions, and
+> optional persist.
 
 [![JSR](https://jsr.io/badges/@dreamer/store)](https://jsr.io/@dreamer/store)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-31%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-Deno%2FBun%2FNode-brightgreen)](./docs/en-US/TEST_REPORT.md)
 
 📖 **Docs**: English | [中文 (Chinese)](./docs/zh-CN/README.md)
 
@@ -44,6 +44,9 @@ deno add jsr:@dreamer/store
 
 # Bun
 bunx jsr add @dreamer/store
+
+# Node.js 22+
+npx jsr add @dreamer/store
 ```
 
 **Framework adapters** (optional): use the subpath that matches your UI
@@ -57,12 +60,13 @@ framework so the store triggers re-renders or effects.
 
 ## 🌍 Environment compatibility
 
-| Environment | Support                                                    |
-| ----------- | ---------------------------------------------------------- |
-| Deno 2.6+   | ✅                                                         |
-| Bun         | ✅                                                         |
-| Server      | ❌ (client-only; persist uses localStorage when available) |
-| Browser     | ✅                                                         |
+| Environment  | Version | Support                                                    |
+| ------------ | ------- | ---------------------------------------------------------- |
+| **Deno**     | 2.6+    | ✅                                                         |
+| **Bun**      | 1.3+    | ✅                                                         |
+| **Node.js**  | 22+     | ✅                                                         |
+| Server       | -       | ❌ (client-only; persist uses localStorage when available) |
+| Browser      | -       | ✅                                                         |
 
 ---
 

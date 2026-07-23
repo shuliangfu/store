@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from "@dreamer/test";
-import { createEffect } from "@dreamer/view/effect";
+import { createEffect } from "@dreamer/view/reactivity";
 import { defineStore } from "../src/mod.ts";
 import { useStoreSignal } from "../src/view.ts";
 

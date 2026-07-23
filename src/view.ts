@@ -6,13 +6,13 @@
  *
  * @example
  * import { useStoreSignal } from "@dreamer/store/view";
- * import { createEffect } from "@dreamer/view/effect";
+ * import { createEffect } from "@dreamer/view/reactivity";
  * const storeState = useStoreSignal(myStore);
  * createEffect(() => { console.log(storeState.count); });  // 只有 count 变时才跑
  * storeState.increment();  // 调用 action
  */
 
-import { createSignal, type SignalRef } from "@dreamer/view/signal";
+import { createSignal, type Signal } from "@dreamer/view/reactivity";
 import type { StoreSubscribe } from "./mod.ts";
 
 /** 带 subscribe 与 getState 的 store（defineStore 单对象形态） */
@@ -21,8 +21,8 @@ export type SubscribableStore<T = Record<string, unknown>> = {
   getState: () => T;
 };
 
-/** 每个 state 字段对应一个 View {@link SignalRef}（`.value` 读/写，与 createSignal 新 API 一致） */
-type FieldSignal = SignalRef<unknown>;
+/** 每个 state 字段对应一个 View {@link Signal}（`.value` 读/写，与 createSignal 新 API 一致） */
+type FieldSignal = Signal<unknown>;
 
 /**
  * 返回与 store 同形的代理：每个 state 字段对应独立 signal，仅该字段变化时依赖它的 effect 才重跑；其余透传
